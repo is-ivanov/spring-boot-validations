@@ -8,12 +8,13 @@ import javax.validation.ConstraintViolationException;
 
 /**
  * Тесты сервиса с аннотацией {@link org.springframework.validation.annotation.Validated}
- * когда есть интерфейс и в нём на методах также стоят валидационные аннотации.
+ * когда есть интерфейс и в нём на методах также стоят валидационные аннотации,
+ * а в имплементации на параметрах метода нет аннотаций.
  */
-class ServiceAsInterfaceWithIT extends BaseIT {
+class ServiceAsInterfaceWithImplWithoutIT extends BaseIT {
 
     @Autowired
-    private ServiceAsInterfaceWithImpl sut;
+    private ServiceAsInterfaceWithImplWithout sut;
 
     /**
      * С '@Validated' на сервисе происходит валидация параметров метода и выбрасывается
@@ -35,10 +36,9 @@ class ServiceAsInterfaceWithIT extends BaseIT {
     @Test
     void objectValid() {
         MyRequest invalidRequest = new MyRequest("less 15", null);
-        Throwable thrown = BDDAssertions.catchThrowable(() -> sut.objectValid(invalidRequest));
-        // THEN:
-        BDDAssertions.then(thrown).isInstanceOf(ConstraintViolationException.class)
-                .hasMessageContainingAll("objectValid.request.birthdate: не должно равняться null",
+        BDDAssertions.assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> sut.objectValid(invalidRequest))
+                .withMessageContainingAll("objectValid.request.birthdate: не должно равняться null",
                         "objectValid.request.value: размер должен находиться в диапазоне от 15 до 2147483647");
     }
 
